@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoShare - Upload & Share Any File</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .upload-area {
+            border: 3px dashed #1a2a6c;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            background: #f9f9ff;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            background: #f0f0ff;
+            border-color: #b21f1f;
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: #1a2a6c;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .browse-btn {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        
+        .browse-btn:hover {
+            background: #b21f1f;
+        }
+        
+        .file-info {
+            background: #f0f0ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .file-size {
+            color: #666;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1a2a6c, #b21f1f);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .generate-btn {
+            background: #b21f1f;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: block;
+            margin: 0 auto 30px;
+            width: 200px;
+        }
+        
+        .generate-btn:hover {
+            background: #fdbb2d;
+            color: #333;
+        }
+        
+        .generate-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .link-container {
+            background: #f0f0ff;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .link-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+        }
+        
+        .share-link {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        
+        .copy-btn {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #b21f1f;
+        }
+        
+        .preview-container {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1a2a6c;
+            font-size: 1.3rem;
+        }
+        
+        .video-preview {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .video-preview video {
+            width: 100%;
+            display: block;
+        }
+        
+        .embed-code {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            flex: 0 0 48%;
+            background: #f0f0ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #1a2a6c;
+            color: #1a2a6c;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .feature {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+    
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VideoShare</h1>
+            <p class="subtitle">Upload any file and get a shareable link with embed options</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="upload">Upload File</div>
+            <div class="tab" data-tab="view">View Shared File</div>
+        </div>
+        
+        <div class="tab-content active" id="upload-tab">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">Drag & drop your file here</p>
+                <p>or</p>
+                <button class="browse-btn">Browse Files</button>
+                <input type="file" id="fileInput" class="file-input">
+            </div>
+            
+            <div class="file-info" id="fileInfo">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="status-message" id="statusMessage"></div>
+            
+            <button class="generate-btn" id="generateBtn" disabled>Upload & Generate Link</button>
+            
+            <div class="link-container" id="linkContainer">
+                <div class="link-title">Your Shareable Link:</div>
+                <div class="share-link" id="shareLink"></div>
+                <button class="copy-btn" id="copyBtn">Copy Link</button>
+                <button class="copy-btn" id="copyEmbedBtn">Copy Embed Code</button>
+                
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-title">Preview:</div>
+                    <div class="video-preview" id="videoPreview"></div>
+                    <div class="embed-code" id="embedCode"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="view-tab">
+            <div class="upload-area">
+                <div class="upload-icon">🔗</div>
+                <p class="upload-text">Paste a shared link to view the file</p>
+                <input type="text" id="sharedLinkInput" placeholder="Paste shared link here" style="width: 80%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px;">
+                <button class="browse-btn" id="viewSharedBtn">View File</button>
+            </div>
+            
+            <div class="preview-container" id="sharedPreviewContainer">
+                <div class="preview-title" id="sharedFileTitle">Shared File:</div>
+                <div class="video-preview" id="sharedVideoPreview"></div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>Any File Type</h3>
+                <p>Upload documents, images, videos, audio, archives - any file type is supported.</p>
+            </div>
+            <div class="feature">
+                <h3>Real Shareable Links</h3>
+                <p>Generate links that actually work. Anyone with the link can view your file.</p>
+            </div>
+            <div class="feature">
+                <h3>Embed Anywhere</h3>
+                <p>Get embed code to display videos on your website or blog.</p>
+            </div>
+            <div class="feature">
+                <h3>Firebase Powered</h3>
+                <p>Your files are securely stored in Firebase with real shareable links.</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>VideoShare - Firebase Powered File Sharing | Created with ❤️</p>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBll0uAHyAsBJNgxvLA5qsG694-aKLAlvI",
+            authDomain: "ludo-samir.firebaseapp.com",
+            databaseURL: "https://ludo-samir-default-rtdb.firebaseio.com",
+            projectId: "ludo-samir",
+            storageBucket: "ludo-samir.firebasestorage.app",
+            messagingSenderId: "954937826031",
+            appId: "1:954937826031:web:3b6a27820ef3fe618e591a",
+            measurementId: "G-6Z4KT1JGWQ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const database = firebase.database();
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const generateBtn = document.getElementById('generateBtn');
+        const linkContainer = document.getElementById('linkContainer');
+        const shareLink = document.getElementById('shareLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyEmbedBtn = document.getElementById('copyEmbedBtn');
+        const previewContainer = document.getElementById('previewContainer');
+        const videoPreview = document.getElementById('videoPreview');
+        const embedCode = document.getElementById('embedCode');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const sharedLinkInput = document.getElementById('sharedLinkInput');
+        const viewSharedBtn = document.getElementById('viewSharedBtn');
+        const sharedPreviewContainer = document.getElementById('sharedPreviewContainer');
+        const sharedVideoPreview = document.getElementById('sharedVideoPreview');
+        const sharedFileTitle = document.getElementById('sharedFileTitle');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        let selectedFile = null;
+        
+        // Event Listeners
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
+        });
+        
+        generateBtn.addEventListener('click', uploadFile);
+        copyBtn.addEventListener('click', copyLink);
+        copyEmbedBtn.addEventListener('click', copyEmbedCode);
+        viewSharedBtn.addEventListener('click', viewSharedFile);
+        
+        // Tab functionality
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show active content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabId}-tab`) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // Functions
+        function handleFileSelection(file) {
+            selectedFile = file;
+            
+            // Display file info
+            fileName.textContent = `File: ${file.name}`;
+            fileSize.textContent = `Size: ${formatFileSize(file.size)}`;
+            fileInfo.style.display = 'block';
+            
+            // Enable generate button
+            generateBtn.disabled = false;
+            
+            // Hide any previous status messages
+            statusMessage.style.display = 'none';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function uploadFile() {
+            if (!selectedFile) return;
+            
+            // Generate a unique ID for the file
+            const fileId = generateFileId();
+            
+            // Create a reference to the file in Firebase Storage
+            const storageRef = storage.ref().child('uploads/' + fileId + '_' + selectedFile.name);
+            
+            // Show progress bar
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            // Disable the upload button
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Uploading...';
+            
+            // Upload file to Firebase Storage
+            const uploadTask = storageRef.put(selectedFile);
+            
+            // Monitor upload progress
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    // Update progress bar
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progressBar.style.width = progress + '%';
+                },
+                (error) => {
+                    // Handle upload error
+                    showStatus('Error uploading file: ' + error.message, 'error');
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Upload & Generate Link';
+                    progressContainer.style.display = 'none';
+                },
+                () => {
+                    // Upload completed successfully
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Save file metadata to Firebase Database
+                        const fileData = {
+                            name: selectedFile.name,
+                            type: selectedFile.type,
+                            size: selectedFile.size,
+                            url: downloadURL,
+                            timestamp: Date.now(),
+                            fileId: fileId
+                        };
+                        
+                        // Save to database
+                        database.ref('files/' + fileId).set(fileData)
+                            .then(() => {
+                                // Generate the shareable link
+                                const currentURL = window.location.href.split('?')[0];
+                                const shareURL = `${currentURL}?file=${fileId}`;
+                                
+                                // Display the link
+                                shareLink.textContent = shareURL;
+                                linkContainer.style.display = 'block';
+                                
+                                // If it's a video, show preview and embed code
+                                if (selectedFile.type.startsWith('video/')) {
+                                    videoPreview.innerHTML = `<video controls><source src="${downloadURL}" type="${selectedFile.type}">Your browser does not support the video tag.</video>`;
+                                    embedCode.textContent = `<iframe src="${currentURL}?file=${fileId}&embed=true" width="560" height="315" frameborder="0" allowfullscreen></iframe>`;
+                                    previewContainer.style.display = 'block';
+                                } else {
+                                    previewContainer.style.display = 'none';
+                                }
+                                
+                                // Show success message
+                                showStatus('File uploaded successfully!', 'success');
+                                
+                                // Reset button
+                                generateBtn.textContent = 'Upload & Generate Link';
+                                progressContainer.style.display = 'none';
+                                
+                                // Scroll to the link
+                                linkContainer.scrollIntoView({ behavior: 'smooth' });
+                            })
+                            .catch((error) => {
+                                showStatus('Error saving file data: ' + error.message, 'error');
+                                generateBtn.disabled = false;
+                                generateBtn.textContent = 'Upload & Generate Link';
+                                progressContainer.style.display = 'none';
+                            });
+                    });
+                }
+            );
+        }
+        
+        function generateFileId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+        
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            
+            if (type === 'success') {
+                statusMessage.classList.add('status-success');
+            } else if (type === 'error') {
+                statusMessage.classList.add('status-error');
+            }
+            
+            statusMessage.style.display = 'block';
+        }
+        
+        function copyLink() {
+            const textArea = document.createElement('textarea');
+            textArea.value = shareLink.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Visual feedback
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.background = '#4CAF50';
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = '';
+            }, 2000);
+        }
+        
+        function copyEmbedCode() {
+            const textArea = document.createElement('textarea');
+            textArea.value = embedCode.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Visual feedback
+            const originalText = copyEmbedBtn.textContent;
+            copyEmbedBtn.textContent = 'Copied!';
+            copyEmbedBtn.style.background = '#4CAF50';
+            
+            setTimeout(() => {
+                copyEmbedBtn.textContent = originalText;
+                copyEmbedBtn.style.background = '';
+            }, 2000);
+        }
+        
+        function viewSharedFile() {
+            const sharedLink = sharedLinkInput.value.trim();
+            if (!sharedLink) return;
+            
+            // Extract file ID from the URL
+            const urlParams = new URLSearchParams(sharedLink.split('?')[1]);
+            const fileId = urlParams.get('file');
+            
+            if (!fileId) {
+                showStatus('Invalid shared link', 'error');
+                return;
+            }
+            
+            // Retrieve file data from Firebase Database
+            database.ref('files/' + fileId).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        showStatus('File not found or link has expired', 'error');
+                        return;
+                    }
+                    
+                    const fileData = snapshot.val();
+                    sharedFileTitle.textContent = `Shared File: ${fileData.name}`;
+                    
+                    // Display the file
+                    if (fileData.type.startsWith('video/')) {
+                        sharedVideoPreview.innerHTML = `<video controls autoplay><source src="${fileData.url}" type="${fileData.type}">Your browser does not support the video tag.</video>`;
+                        sharedPreviewContainer.style.display = 'block';
+                    } else {
+                        // For non-video files, create a download link
+                        sharedVideoPreview.innerHTML = `<div style="padding: 20px; text-align: center;">
+                            <p>This is a ${fileData.type || 'file'}.</p>
+                            <a href="${fileData.url}" download="${fileData.name}" class="browse-btn" style="display: inline-block; margin-top: 15px;">Download File</a>
+                        </div>`;
+                        sharedPreviewContainer.style.display = 'block';
+                    }
+                    
+                    showStatus('File loaded successfully!', 'success');
+                })
+                .catch((error) => {
+                    showStatus('Error loading file: ' + error.message, 'error');
+                });
+        }
+        
+        // Check if page was loaded with a file parameter (for shared links)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fileId = urlParams.get('file');
+            const embedMode = urlParams.get('embed');
+            
+            if (fileId) {
+                // Retrieve file data from Firebase Database
+                database.ref('files/' + fileId).once('value')
+                    .then((snapshot) => {
+                        if (!snapshot.exists()) {
+                            if (embedMode) {
+                                document.body.innerHTML = '<p>File not found or link has expired</p>';
+                            } else {
+                                showStatus('File not found or link has expired', 'error');
+                            }
+                            return;
+                        }
+                        
+                        const fileData = snapshot.val();
+                        
+                        if (embedMode) {
+                            // Embed mode - show only the video
+                            if (fileData.type.startsWith('video/')) {
+                                document.body.innerHTML = `
+                                    <video controls autoplay style="width: 100%; height: 100%;">
+                                        <source src="${fileData.url}" type="${fileData.type}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                `;
+                            } else {
+                                document.body.innerHTML = `
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+                                        <p>This file cannot be embedded: ${fileData.name}</p>
+                                        <a href="${fileData.url}" download="${fileData.name}" style="margin-top: 20px; padding: 10px 20px; background: #1a2a6c; color: white; text-decoration: none; border-radius: 5px;">Download File</a>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            // Normal view mode - switch to view tab and show file
+                            tabs.forEach(t => t.classList.remove('active'));
+                            document.querySelector('.tab[data-tab="view"]').classList.add('active');
+                            
+                            tabContents.forEach(content => {
+                                content.classList.remove('active');
+                                if (content.id === 'view-tab') {
+                                    content.classList.add('active');
+                                }
+                            });
+                            
+                            sharedFileTitle.textContent = `Shared File: ${fileData.name}`;
+                            
+                            if (fileData.type.startsWith('video/')) {
+                                sharedVideoPreview.innerHTML = `<video controls autoplay><source src="${fileData.url}" type="${fileData.type}">Your browser does not support the video tag.</video>`;
+                                sharedPreviewContainer.style.display = 'block';
+                            } else {
+                                sharedVideoPreview.innerHTML = `<div style="padding: 20px; text-align: center;">
+                                    <p>This is a ${fileData.type || 'file'}.</p>
+                                    <a href="${fileData.url}" download="${fileData.name}" class="browse-btn" style="display: inline-block; margin-top: 15px;">Download File</a>
+                                </div>`;
+                                sharedPreviewContainer.style.display = 'block';
+                            }
+                            
+                            showStatus('File loaded successfully!', 'success');
+                        }
+                    })
+                    .catch((error) => {
+                        if (embedMode) {
+                            document.body.innerHTML = '<p>Error loading file: ' + error.message + '</p>';
+                        } else {
+                            showStatus('Error loading file: ' + error.message, 'error');
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
